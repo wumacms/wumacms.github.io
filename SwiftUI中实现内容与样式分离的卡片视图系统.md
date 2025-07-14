@@ -57,25 +57,46 @@ CardView(title: "文学赏析", description: "古典诗词的现代解读")
 ```swift
 import SwiftUI
 
-protocol CardStyle {
-    associatedtype Body: View
-    func makeBody(configuration: CardStyleConfiguration) -> Body
+struct CardStyleDemo: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            CardView(title: "科技新闻", description: "最新的人工智能突破")
+                .cardStyle(.modern)
+            
+            CardView(title: "文学赏析", description: "古典诗词的现代解读")
+                .cardStyle(.classic)
+            
+            CardView(title: "默认样式", description: "未指定样式时使用默认卡片样式")
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.white)
+    }
 }
 
-struct CardStyleConfiguration {
+#Preview {
+    CardStyleDemo()
+}
+
+protocol CardStyle {
+    associatedtype Body: View
+    func makeBody(model: CardStyleModel) -> Body
+}
+
+struct CardStyleModel {
     let title: String
     let description: String
 }
 
 struct AnyCardStyle: CardStyle {
-    private let _makeBody: (CardStyleConfiguration) -> AnyView
-
+    private let _makeBody: (CardStyleModel) -> AnyView
+    
     init<S: CardStyle>(_ style: S) {
-        _makeBody = { AnyView(style.makeBody(configuration: $0)) }
+        _makeBody = { AnyView(style.makeBody(model: $0)) }
     }
-
-    func makeBody(configuration: CardStyleConfiguration) -> some View {
-        _makeBody(configuration)
+    
+    func makeBody(model: CardStyleModel) -> some View {
+        _makeBody(model)
     }
 }
 
@@ -94,7 +115,7 @@ enum CardStyleType {
     case `default`
     case modern
     case classic
-
+    
     var style: AnyCardStyle {
         switch self {
         case .default: AnyCardStyle(DefaultCardStyle())
@@ -113,80 +134,104 @@ extension View {
 struct CardView: View {
     let title: String
     let description: String
-
+    
     @Environment(\.cardStyle) private var style
-
+    
     var body: some View {
-        style.makeBody(configuration: .init(title: title, description: description))
+        style.makeBody(model: .init(title: title, description: description))
     }
 }
 
 struct DefaultCardStyle: CardStyle {
-    func makeBody(configuration: CardStyleConfiguration) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(configuration.title).font(.headline)
-            Text(configuration.description).font(.subheadline)
-        }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(8)
-        .shadow(radius: 2)
-    }
-}
-
-struct ModernCardStyle: CardStyle {
-    func makeBody(configuration: CardStyleConfiguration) -> some View {
+    func makeBody(model: CardStyleModel) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(configuration.title)
-                .font(.title)
-                .bold()
-                .foregroundColor(.white)
-            Text(configuration.description)
-                .font(.body)
-                .foregroundColor(.white.opacity(0.8))
-        }
-        .padding()
-        .background(Color.blue)
-        .cornerRadius(12)
-        .shadow(radius: 5)
-    }
-}
-
-struct ClassicCardStyle: CardStyle {
-    func makeBody(configuration: CardStyleConfiguration) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(configuration.title)
+            Text(model.title)
                 .font(.headline)
-                .foregroundColor(.black)
-            Divider()
-            Text(configuration.description)
-                .font(.footnote)
-                .foregroundColor(.gray)
+                .foregroundColor(.primary)
+            
+            Text(model.description)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .lineSpacing(4)
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.gray)
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.gray.opacity(0.1), lineWidth: 1)
         )
     }
 }
 
-struct ContentView: View {
-    var body: some View {
-        VStack(spacing: 16) {
-            CardView(title: "科技新闻", description: "最新的人工智能突破")
-                .cardStyle(.modern)
-
-            CardView(title: "文学赏析", description: "古典诗词的现代解读")
-                .cardStyle(.classic)
-
-            CardView(title: "默认样式", description: "未指定样式时使用默认卡片样式")
+struct ModernCardStyle: CardStyle {
+    func makeBody(model: CardStyleModel) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(model.title)
+                .font(.title3)
+                .bold()
+                .foregroundColor(.white)
+            
+            Text(model.description)
+                .font(.body)
+                .foregroundColor(.white.opacity(0.9))
+                .lineSpacing(5)
         }
-        .padding()
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.blue, Color.purple]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .cornerRadius(16)
+        .shadow(color: Color.blue.opacity(0.3), radius: 10, x: 0, y: 5)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+        )
     }
 }
 
-#Preview {
-    ContentView()
+struct ClassicCardStyle: CardStyle {
+    func makeBody(model: CardStyleModel) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(model.title)
+                .font(.headline)
+                .foregroundColor(.black)
+                .padding(.bottom, 2)
+            
+            Divider()
+                .background(Color.gray.opacity(0.3))
+            
+            Text(model.description)
+                .font(.subheadline)
+                .foregroundColor(.gray)
+                .lineSpacing(4)
+        }
+        .padding(16)
+        .background(
+            ZStack {
+                Color(.systemBackground)
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.gray.opacity(0.2), Color.gray.opacity(0.4)]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 1
+                    )
+            }
+        )
+        .cornerRadius(8)
+    }
 }
 ```
