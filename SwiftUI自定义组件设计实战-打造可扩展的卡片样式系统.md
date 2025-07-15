@@ -47,7 +47,9 @@ struct AnyCardStyle: CardStyle {
     private let _makeBody: (CardStyleConfiguration) -> AnyView
 
     init<S: CardStyle>(_ style: S) {
-        _makeBody = { AnyView(style.makeBody(configuration: $0)) }
+        _makeBody = { config in
+            AnyView(style.makeBody(configuration: config))
+        }
     }
 
     func makeBody(configuration: CardStyleConfiguration) -> some View {
