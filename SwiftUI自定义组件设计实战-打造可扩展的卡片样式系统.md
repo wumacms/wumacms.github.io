@@ -142,7 +142,7 @@ struct CardView: View {
 ## 🔗 Step 6：添加样式修饰符 .cardStyle
 
 ```swift
-extension View {
+extension CardView {
     func cardStyle<S: CardStyle>(_ style: S) -> some View {
         environment(\.cardStyle, AnyCardStyle(style))
     }
