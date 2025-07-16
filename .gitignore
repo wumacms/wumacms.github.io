@@ -1,0 +1,47 @@
+# Node.js
+node_modules/
+dist/
+build/
+.temp/
+.temp/*
+
+# 静态站点构建输出目录（根据具体框架设置）
+docs/.vitepress/dist/
+docs/.vuepress/dist/
+.docusaurus/
+public/
+_site/
+out/
+
+# MacOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# 日志文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# dotenv 配置
+.env
+.env.*
+!.env.example
+
+# 缓存文件
+.cache/
+.next/
+.svelte-kit/
+.hugo_build.lock
+
+# GitHub Pages 自部署构建缓存
+.github/workflows/*.log
+*.local
+*.bak
+
+# 包管理器锁文件（视情况而定）
+# yarn.lock
+# package-lock.json
+# pnpm-lock.yaml
